@@ -2,8 +2,12 @@ import React from "react";
 import kerala from ".././../assets/AIKerala.webp";
 
 function Hero() {
+
+
+
+
   return (
-    <div className="relative w-full h-[500px]">
+    <div className="flex justify-center relative w-full h-[500px]">
       <img
         className="w-full h-[500px] object-fit brightness-75 opacity-90"
         src={kerala}
@@ -24,44 +28,13 @@ function Hero() {
         </div>
       </div>
       <div className="absolute top-4 right-4">
-        <button className="bg-gradient-to-r from-orange-500 to-gray-700 px-6 py-2 rounded-full shadow-lg">
+        <button className="bg-gradient-to-r from-orange-500 to-gray-700 text-white font-bold px-6 py-2 rounded-full shadow-lg">
           Create trip with AI ✨
         </button>
       </div>
-      <div className="absolute h-20 justify-center items-center bg-gray-50 rounded-full px-10 py-2 shadow-md">
-            <ul className="flex flex-row space-x-24 justify-center items-center">
-                <li className="flex flex-row justify-center items-center space-x-2">
-                    <img 
-                    className="rounded-full h-[3rem] w-[3rem]"
-                    src={kerala} alt=""/>
-                    <h2>Honeymoon</h2>
-                </li>
-                <li className="flex flex-row justify-center items-center space-x-2">
-                    <img 
-                    className="rounded-full h-[3rem] w-[3rem]"
-                    src={kerala} alt=""/>
-                    <h2>Pilgrimage</h2>
-                </li>
-                <li className="flex flex-row justify-center items-center space-x-2">
-                    <img 
-                    className="rounded-full h-[3rem] w-[3rem]"
-                    src={kerala} alt=""/>
-                    <h2>Adventure</h2>
-                </li>
-                <li className="flex flex-row justify-center items-center space-x-2">
-                    <img 
-                    className="rounded-full h-[3rem] w-[3rem]"
-                    src={kerala} alt=""/>
-                    <h2>Group</h2>
-                </li>
-                <li className="flex flex-row justify-center items-center space-x-2">
-                    <img 
-                    className="rounded-full h-[3rem] w-[3rem]"
-                    src={kerala} alt=""/>
-                    <h2>Leisure</h2>
-                </li>
-            </ul>
-      </div>
+      
+    
+
     </div>
   );
 }
