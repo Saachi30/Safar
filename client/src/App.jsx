@@ -5,6 +5,7 @@ import Packages from './Pages/Packages';
 import About from './Pages/About';
 import Contact from './Pages/Contact';
 import Navbar from './Pages/Navbar/Navbar';
+import Footer from './Pages/Footer/Footer';
 
 function App() {
 
@@ -18,6 +19,7 @@ function App() {
         <Route path='packages'element={<Packages/>}/>
         <Route path='contact'element={<Contact/>}/>
       </Routes>
+      <Footer/>
     </BrowserRouter>
       
     </>

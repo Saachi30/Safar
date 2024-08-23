@@ -2,6 +2,7 @@ import React from 'react'
 import Hero from './Home/Hero';
 import Popular from './Home/Popular';
 import ChooseUs from './Home/ChooseUs';
+import Subscribe from './Home/Subscribe';
 
 function Home() {
   return (
@@ -9,6 +10,7 @@ function Home() {
       <Hero/>
       <Popular/>
       <ChooseUs/>
+      <Subscribe/>
     </div>
   )
 }
