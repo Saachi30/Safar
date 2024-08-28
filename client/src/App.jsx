@@ -6,6 +6,7 @@ import About from './Pages/About';
 import Contact from './Pages/Contact';
 import Navbar from './Pages/Navbar/Navbar';
 import Footer from './Pages/Footer/Footer';
+import TravelPref from './Pages/TravelPref';
 
 function App() {
 
@@ -18,6 +19,7 @@ function App() {
         <Route path='about'element={<About/>}/>
         <Route path='packages'element={<Packages/>}/>
         <Route path='contact'element={<Contact/>}/>
+        <Route path='travelpref' element={<TravelPref/>}/>
       </Routes>
       <Footer/>
     </BrowserRouter>

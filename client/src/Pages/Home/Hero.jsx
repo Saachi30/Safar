@@ -1,5 +1,6 @@
 import React from "react";
 import kerala from ".././../assets/AIKerala.webp";
+import { Link } from "react-router-dom";
 
 function Hero() {
 
@@ -29,7 +30,9 @@ function Hero() {
       </div>
       <div className="absolute top-4 right-4">
         <button className="bg-gradient-to-r from-orange-500 to-gray-700 text-white font-bold px-6 py-2 rounded-full shadow-lg">
-          Create trip with AI ✨
+          <Link 
+          to="travelpref"
+          >Create trip with AI ✨</Link>
         </button>
       </div>
       
