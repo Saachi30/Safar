@@ -15,21 +15,21 @@ function Hero() {
         alt="Landing Page Kerala"
       />
 
-      <div className="absolute inset-0 flex flex-col justify-center items-center text-white">
-        <h1 className="text-4xl font-bold mb-4">Safar begins here.....</h1>
+      <div className="absolute inset-0 flex flex-col items-center justify-center text-white">
+        <h1 className="mb-4 text-4xl font-bold">Safar begins here.....</h1>
         <div className="flex items-center bg-white rounded-full w-[400px] pl-4 shadow-lg mb-4">
           <input
             type="text"
             placeholder="Enter Your Dream Destination"
-            className="flex-grow outline-none text-gray-700"
+            className="flex-grow text-gray-700 outline-none"
           />
-          <button className="bg-orange-500 text-white px-4 py-2 rounded-full">
+          <button className="px-4 py-2 text-white bg-orange-500 rounded-full">
             Search
           </button>
         </div>
       </div>
       <div className="absolute top-4 right-4">
-        <button className="bg-gradient-to-r from-orange-500 to-gray-700 text-white font-bold px-6 py-2 rounded-full shadow-lg">
+        <button className="sticky top-0 px-6 py-2 font-bold text-white rounded-full shadow-lg bg-gradient-to-r from-orange-500 to-gray-700">
           <Link 
           to="travelpref"
           >Create trip with AI ✨</Link>

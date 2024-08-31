@@ -23,7 +23,7 @@ function TravelPref() {
 
 
   return (
-    <div className='flex flex-col justify-center items-center gap-14 p-8'>
+    <div className='flex flex-col items-center justify-center p-8 gap-14'>
       <div className='flex flex-col gap-4'>
         <h1 className='text-3xl font-bold'>Tell us your travel preferences</h1>
         <p>Just provide some basic information, and our trip planner will generate a customized itinerary based on your preferences.</p>
@@ -47,7 +47,7 @@ function TravelPref() {
         {destinations.length > 0 && (
           <ul className='flex flex-col gap-2'>
             {destinations.map((destination, index) => (
-              <li key={index} className='flex justify-between items-center bg-gray-100 p-2 rounded-md'>
+              <li key={index} className='flex items-center justify-between p-2 bg-gray-100 rounded-md'>
                 {destination}
               </li>
             ))}
@@ -75,11 +75,11 @@ function TravelPref() {
             value={budget}
             onChange={(e) => setBudget(e.target.value)}
           />
-          <div className="flex justify-between text-gray-600 mt-2">
+          <div className="flex justify-between mt-2 text-gray-600">
             <span>₹0</span>
             <span>₹1L+</span>
           </div>
-          <div className="text-gray-800 font-semibold">
+          <div className="font-semibold text-gray-800">
             Selected Budget: ₹{budget}
           </div>
         </div>
@@ -127,7 +127,7 @@ function TravelPref() {
 
         </div>
 
-        <button className='w-full bg-orange-400 hover:bg-orange-500 text-white py-2 rounded-full mt-10'>
+        <button className='w-full py-2 mt-10 text-white bg-orange-500 rounded-full hover:bg-orange-400'>
           Submit
         </button>
       </form>

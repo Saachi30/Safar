@@ -1,0 +1,6 @@
+.blur-background {
+    filter: blur(0px);
+    transition: filter 0.4s ease-in ;
+
+  }
+  
