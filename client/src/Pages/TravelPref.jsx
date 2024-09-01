@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
+import Loading from 'react-simple-loading';
 
 function TravelPref() {
   const [destinations, setDestinations] = useState([]);
-  const[days, setDays] = useState("");
-  const[companion, setCompanion] = useState("");
+  const [days, setDays] = useState("");
+  const [companion, setCompanion] = useState("");
   const [currentDestination, setCurrentDestination] = useState('');
   const [budget, setBudget] = useState(0);
+  const [loading, setLoading] = useState(false); // State to track loading
 
   const handleAddDestination = () => {
     if (currentDestination.trim()) {
@@ -21,6 +23,30 @@ function TravelPref() {
     }
   };
 
+  const handleSubmit = async () => {
+    setLoading(true); // Set loading to true when starting the fetch
+    try {
+      const response = await fetch('http://127.0.0.1:8000/travel-plan/generate/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          location: destinations.join(', '),
+          days: days,
+          companion: companion,
+          budget: budget,
+        }),
+      });
+
+      const data = await response.json();
+      console.log(data.response);
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setLoading(false); // Set loading to false after fetch completes
+    }
+  };
 
   return (
     <div className='flex flex-col items-center justify-center p-8 gap-14'>
@@ -28,10 +54,14 @@ function TravelPref() {
         <h1 className='text-3xl font-bold'>Tell us your travel preferences</h1>
         <p>Just provide some basic information, and our trip planner will generate a customized itinerary based on your preferences.</p>
       </div>
-      
-      <form 
-      className='flex flex-col justify-center gap-8' 
-      onSubmit={(e) => e.preventDefault()}>
+
+      <form
+        className='flex flex-col justify-center gap-8'
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmit();
+        }}
+      >
         <div className='flex flex-col gap-4'>
           <label className='font-semibold'>What is your destination of choice?</label>
           <input
@@ -43,7 +73,7 @@ function TravelPref() {
             onKeyPress={handleKeyPress}
           />
         </div>
-        
+
         {destinations.length > 0 && (
           <ul className='flex flex-col gap-2'>
             {destinations.map((destination, index) => (
@@ -83,7 +113,7 @@ function TravelPref() {
             Selected Budget: ₹{budget}
           </div>
         </div>
-        
+
         <div className='flex flex-col justify-center gap-4'>
           <label className='font-semibold'>Who do you plan on travelling with on your next adventure?</label>
           <div className="flex gap-4">
@@ -124,11 +154,19 @@ function TravelPref() {
             />
             <label htmlFor="friends">Friends</label>
           </div>
-
         </div>
 
-        <button className='w-full py-2 mt-10 text-white bg-orange-500 rounded-full hover:bg-orange-400'>
-          Submit
+        <button
+          className='w-full py-2 mt-10 text-white bg-orange-500 rounded-full hover:bg-orange-400'
+          disabled={loading} // Disable button while loading
+        >
+          {loading ? (
+            <div className="flex justify-center items-center gap-2">
+              <Loading color="#fff" size="16px" />
+            </div>
+          ) : (
+            'Submit'
+          )}
         </button>
       </form>
     </div>
