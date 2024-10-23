@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Loading from 'react-simple-loading';
+import { Link, useNavigate } from 'react-router-dom';
 
 function TravelPref() {
   const [destinations, setDestinations] = useState([]);
@@ -8,6 +9,7 @@ function TravelPref() {
   const [currentDestination, setCurrentDestination] = useState('');
   const [budget, setBudget] = useState(0);
   const [loading, setLoading] = useState(false); // State to track loading
+  const navigate = useNavigate();
 
   const handleAddDestination = () => {
     if (currentDestination.trim()) {
@@ -41,6 +43,7 @@ function TravelPref() {
 
       const data = await response.json();
       console.log(data.response);
+      navigate('/plan');
     } catch (error) {
       console.error('Error:', error);
     } finally {
@@ -167,6 +170,7 @@ function TravelPref() {
           ) : (
             'Submit'
           )}
+          
         </button>
       </form>
     </div>

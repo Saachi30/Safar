@@ -30,9 +30,9 @@ function Navbar() {
 
 
   return (
-    <div className="flex items-center justify-between p-4 shadow-md">
+    <div className="flex items-center justify-between px-4 py-2 shadow-md">
       <div>
-        <img src={safarLogo} alt="Logo" className="h-10" />
+        <img src={safarLogo} alt="Logo" className="h-14" />
       </div>
       <ul className="flex space-x-8">
         <li onClick={() => setMenu("home")}>
