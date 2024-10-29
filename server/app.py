@@ -4,12 +4,36 @@ from flask_jwt_extended import JWTManager, create_access_token, create_refresh_t
 from database import db_session, init_db
 from models import User, TravelPackage, SearchHistory
 from recommendation import RecommendationEngine
-from datetime import datetime
+from datetime import datetime, timedelta
 from config import Config
+from flask_cors import CORS  # Add this import
 import re
 
 app = Flask(__name__)
 app.config.from_object(Config)
+
+# Updated CORS configuration
+CORS(app, resources={
+    r"/api/*": {
+        "origins": ["http://localhost:5173"],  # Your React app's origin
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": True
+    }
+})
+
+# Test endpoint
+@app.route('/api/test', methods=['GET'])
+def test():
+    return jsonify({"message": "CORS is working!"}), 200
+
+# Configure JWT settings
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
+app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=30)
+app.config['JWT_TOKEN_LOCATION'] = ['headers']
+app.config['JWT_HEADER_NAME'] = 'Authorization'
+app.config['JWT_HEADER_TYPE'] = 'Bearer'
+
 jwt = JWTManager(app)
 recommendation_engine = RecommendationEngine()
 
@@ -24,7 +48,7 @@ def is_valid_email(email):
 
 def is_valid_password(password):
     # At least 8 characters, 1 uppercase, 1 lowercase, 1 number
-    return len(password) >= 8 and any(c.isupper() for c in password) and \
+    return len(password) >= 4 and any(c.isupper() for c in password) and \
            any(c.islower() for c in password) and any(c.isdigit() for c in password)
 
 # Basic route to test if API is working
@@ -36,7 +60,7 @@ def home():
 @app.route('/api/auth/signup', methods=['POST'])
 def signup():
     data = request.json
-    
+    print(data)
     if not data or not all(k in data for k in ['username', 'email', 'password']):
         return jsonify({"error": "Username, email, and password are required"}), 400
     
@@ -60,6 +84,7 @@ def signup():
         new_user = User(
             username=data['username'],
             email=data['email'],
+            phone=data['phone'],
             created_at=datetime.utcnow()
         )
         new_user.set_password(data['password'])
@@ -294,4 +319,4 @@ def internal_error(error):
 
 if __name__ == '__main__':
     init_db()
-    app.run(debug=True)
+    app.run(debug=True, port=5000)

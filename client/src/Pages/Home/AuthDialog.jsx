@@ -7,6 +7,7 @@ import { signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPass
 const AuthDialog = ({ open, handleClose, onLoginSuccess }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
 
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -18,18 +19,49 @@ const AuthDialog = ({ open, handleClose, onLoginSuccess }) => {
 
   const toggleAuth = () => {
     setIsLogin(!isLogin);
+    setError("");
   };
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
+   // Store tokens in localStorage
+   const storeTokens = (tokens) => {
+    localStorage.setItem('accessToken', tokens.access_token);
+    if (tokens.refresh_token) {
+      localStorage.setItem('refreshToken', tokens.refresh_token);
+    }
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError("");
+    
     try {
-      await signInWithEmailAndPassword(auth, loginEmail, loginPassword);
-      onLoginSuccess(); // Callback after successful login
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          email: loginEmail,
+          password: loginPassword,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Login failed');
+      }
+
+      storeTokens(data);
+      onLoginSuccess(data.user);
+      handleClose();
     } catch (error) {
+      setError(error.message);
       console.error("Login error:", error.message);
     }
   };
@@ -45,15 +77,67 @@ const AuthDialog = ({ open, handleClose, onLoginSuccess }) => {
 
   const handleSignup = async (e) => {
     e.preventDefault();
+    setError("");
+
     if (signupPassword !== signupConfirmPassword) {
-      console.error("Passwords do not match");
+      setError("Passwords do not match");
       return;
     }
+
     try {
-      await createUserWithEmailAndPassword(auth, signupEmail, signupPassword);
-      onLoginSuccess(); // Callback after successful sign-up
+      const response = await fetch('http://localhost:5000/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          username: signupUsername,
+          email: signupEmail,
+          phone: signupPhone,
+          password: signupPassword,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Signup failed');
+      }
+
+      storeTokens(data);
+      onLoginSuccess(data.user);
+      handleClose();
     } catch (error) {
+      setError(error.message);
       console.error("Signup error:", error.message);
+    }
+  };
+  // Function to refresh token
+  const refreshToken = async () => {
+    try {
+      const refreshToken = localStorage.getItem('refreshToken');
+      if (!refreshToken) throw new Error('No refresh token available');
+
+      const response = await fetch('http://localhost:5000/api/auth/refresh', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${refreshToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Token refresh failed');
+
+      localStorage.setItem('accessToken', data.access_token);
+      return data.access_token;
+    } catch (error) {
+      console.error("Token refresh error:", error);
+      // Clear tokens and redirect to login
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      return null;
     }
   };
 
@@ -149,6 +233,7 @@ const AuthDialog = ({ open, handleClose, onLoginSuccess }) => {
               <p className="mb-4 text-sm text-center text-gray-600">
                 Make your safar suffer free!
               </p>
+              {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
               <input
                 type="text"
                 placeholder="User Name"

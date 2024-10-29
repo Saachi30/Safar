@@ -11,18 +11,21 @@ def create_sample_data():
             User(
                 username="john_doe",
                 email="john@example.com",
+                phone="987613456",
                 password_hash=generate_password_hash("JohnPass123!"),
                 created_at=datetime.utcnow()
             ),
             User(
                 username="jane_smith",
                 email="jane@example.com",
+                phone="6765412347",
                 password_hash=generate_password_hash("JanePass123!"),
                 created_at=datetime.utcnow()
             ),
             User(
                 username="admin",
                 email="admin@safar.com",
+                phone="9876561029",
                 password_hash=generate_password_hash("Admin@123"),
                 created_at=datetime.utcnow()
             )
@@ -60,6 +63,7 @@ def create_sample_data():
                 activities="Spa Treatments, Yoga Sessions, Temple Visits, Beach Activities, Cooking Class",
                 category="luxury"
             ),
+            
             TravelPackage(
                 name="Swiss Alps Adventure",
                 destination="Switzerland",
