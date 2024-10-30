@@ -55,8 +55,8 @@ class RecommendationEngine:
             if self.packages_df is not None and not self.packages_df.empty:
                 return self.packages_df.sample(min(num_recommendations, len(self.packages_df)))
             return pd.DataFrame()  # Return empty DataFrame if no packages exist
-        
-        # Get similarity scores for each package based on user history
+
+        # Get packages similar to user's searched destinations
         user_preferences = []
         for search in user_history:
             # Find packages similar to user's searched destinations
@@ -66,15 +66,18 @@ class RecommendationEngine:
             
             if len(package_indices) > 0:
                 user_preferences.extend(package_indices)
-        
-        if not user_preferences:
-            return self.packages_df.sample(min(num_recommendations, len(self.packages_df)))
-        
-        # Calculate average similarity scores
-        similarity_scores = np.mean([
-            self.similarity_matrix[idx] for idx in user_preferences
-        ], axis=0)
-        
-        # Get top recommendations
-        package_indices = similarity_scores.argsort()[::-1][:num_recommendations]
-        return self.packages_df.iloc[package_indices]
+
+        # If user preferences found, prioritize them
+        if user_preferences:
+            # Calculate similarity scores for user preferences
+            similarity_scores = np.mean([self.similarity_matrix[idx] for idx in user_preferences], axis=0)
+            
+            # Create a DataFrame for recommendations with scores
+            recommendations = self.packages_df.copy()
+            recommendations['score'] = similarity_scores
+            
+            # Get top recommendations based on score
+            return recommendations.nlargest(num_recommendations, 'score')
+
+        # If no preferences found, return random packages
+        return self.packages_df.sample(min(num_recommendations, len(self.packages_df)))

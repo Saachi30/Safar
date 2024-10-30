@@ -15,9 +15,30 @@ function TravelPref() {
   const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
-  const handleAddDestination = () => {
+  const handleAddDestination = async () => {
     if (currentDestination.trim()) {
       setDestinations([...destinations, currentDestination.trim()]);
+      
+      // Record search if user is logged in
+      //console.log(typeof(currentDestination.trim()))
+      const accessToken = localStorage.getItem('accessToken');
+      if (accessToken) {
+        try {
+          await fetch('http://localhost:5000/api/search', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${accessToken}`
+            },
+            body: JSON.stringify({
+              destination: currentDestination.trim()
+            })
+          });
+        } catch (error) {
+          console.error('Error recording search:', error);
+        }
+      }
+      
       setCurrentDestination('');
     }
   };

@@ -191,9 +191,11 @@ def get_packages():
             "packages": [{
                 "id": p.id,
                 "name": p.name,
-                "destination": p.destination,
+                "image": p.image,
+                "price": p.price,
                 "duration": p.duration,
-                "budget": p.budget,
+                "groupSize": p.groupSize,
+                "location": p.location,
                 "description": p.description,
                 "activities": p.activities,
                 "category": p.category
@@ -208,7 +210,7 @@ def get_packages():
 @app.route('/api/packages', methods=['POST'])
 def add_package():
     data = request.json
-    required_fields = ['name', 'destination', 'duration', 'budget', 'category']
+    required_fields = ['name', 'image', 'price', 'duration', 'groupSize', 'location', 'description', 'activities', 'category']
     
     if not data or not all(field in data for field in required_fields):
         return jsonify({
@@ -219,11 +221,13 @@ def add_package():
     try:
         package = TravelPackage(
             name=data['name'],
-            destination=data['destination'],
+            image=data['image'],
+            price=float(data['price']),
             duration=data['duration'],
-            budget=float(data['budget']),
-            description=data.get('description', ''),
-            activities=data.get('activities', ''),
+            groupSize=data['groupSize'],
+            location=data['location'],
+            description=data['description'],
+            activities=data['activities'],
             category=data['category']
         )
         db_session.add(package)
@@ -240,9 +244,13 @@ def add_package():
             "package": {
                 "id": package.id,
                 "name": package.name,
-                "destination": package.destination,
+                "image": package.image,
+                "price": package.price,
                 "duration": package.duration,
-                "budget": package.budget,
+                "groupSize": package.groupSize,
+                "location": package.location,
+                "description": package.description,
+                "activities": package.activities,
                 "category": package.category
             }
         }), 201
@@ -257,22 +265,60 @@ def add_package():
 @app.route('/api/search', methods=['POST'])
 @jwt_required()
 def record_search():
-    data = request.json
-    if not data or 'destination' not in data:
-        return jsonify({"error": "Destination is required"}), 400
-    
     try:
+        # Get and validate request data
+        data = request.get_json()
+        print(data)
+        if not data:
+            return jsonify({
+                "status": "error",
+                "message": "No data provided"
+            }), 400
+
+        # Extract location/destination from the request
+        location = data.get('location') or data.get('destination')
+        if not location:
+            return jsonify({
+                "status": "error",
+                "message": "Location or destination is required"
+            }), 400
+
+        # Get current user
         current_user_id = get_jwt_identity()
-        search = SearchHistory(
+        if not current_user_id:
+            return jsonify({
+                "status": "error",
+                "message": "User not authenticated"
+            }), 401
+
+        # Create new search history entry
+        new_search = SearchHistory(
             user_id=current_user_id,
-            destination=data['destination']
+            destination=location,
+            search_date=datetime.utcnow()
         )
-        db_session.add(search)
+        
+        # Add to database
+        db_session.add(new_search)
         db_session.commit()
-        return jsonify({"message": "Search recorded successfully"}), 201
+
+        return jsonify({
+            "status": "success",
+            "message": "Search recorded successfully",
+            "search": {
+                "destination": location,
+                "timestamp": new_search.search_date.isoformat()
+            }
+        }), 201
+
     except Exception as e:
         db_session.rollback()
-        return jsonify({"error": str(e)}), 400
+        print(f"Search error: {str(e)}")  # For debugging
+        return jsonify({
+            "status": "error",
+            "message": "An error occurred while recording search",
+            "error": str(e)
+        }), 500
 
 # Recommendations route
 @app.route('/api/recommendations')
@@ -290,10 +336,28 @@ def get_recommendations():
         user_history = db_session.query(SearchHistory).filter_by(user_id=current_user_id)\
             .order_by(SearchHistory.search_date.desc()).all()
         
-        # Check if we have packages
+        # If no search history, return regular packages
+        if not user_history:
+            packages = db_session.query(TravelPackage).all()
+            return jsonify({
+                "recommendations": [{
+                    "id": p.id,
+                    "name": p.name,
+                    "image": p.image,
+                    "price": p.price,
+                    "duration": p.duration,
+                    "groupSize": p.groupSize,
+                    "location": p.location,
+                    "description": p.description,
+                    "activities": p.activities,
+                    "category": p.category
+                } for p in packages]
+            }), 200
+            
+        # Get all packages
         packages = db_session.query(TravelPackage).all()
         if not packages:
-            return jsonify({"message": "No packages available yet"}), 200
+            return jsonify({"recommendations": []}), 200
             
         # Update recommendation engine with current packages
         recommendation_engine.prepare_package_features(packages)
@@ -301,11 +365,48 @@ def get_recommendations():
         # Get recommendations
         recommendations = recommendation_engine.get_recommendations(user_history)
         
+        if recommendations.empty:
+            # Fallback to all packages if no recommendations
+            return jsonify({
+                "recommendations": [{
+                    "id": p.id,
+                    "name": p.name,
+                    "image": p.image,
+                    "price": p.price,
+                    "duration": p.duration,
+                    "groupSize": p.groupSize,
+                    "location": p.location,
+                    "description": p.description,
+                    "activities": p.activities,
+                    "category": p.category
+                } for p in packages]
+            }), 200
+        
         return jsonify({
             "recommendations": recommendations.to_dict(orient='records')
         }), 200
+        
     except Exception as e:
-        return jsonify({"error": str(e)}), 400
+        print(f"Error in recommendations: {str(e)}")  # For debugging
+        # Fallback to regular packages on error
+        try:
+            packages = db_session.query(TravelPackage).all()
+            return jsonify({
+                "recommendations": [{
+                    "id": p.id,
+                    "name": p.name,
+                    "image": p.image,
+                    "price": p.price,
+                    "duration": p.duration,
+                    "groupSize": p.groupSize,
+                    "location": p.location,
+                    "description": p.description,
+                    "activities": p.activities,
+                    "category": p.category
+                } for p in packages]
+            }), 200
+        except Exception as inner_e:
+            return jsonify({"error": f"Failed to get recommendations: {str(e)}", "inner_error": str(inner_e)}), 500
 
 # Error handlers
 @app.errorhandler(404)

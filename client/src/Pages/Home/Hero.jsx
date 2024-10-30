@@ -1,11 +1,32 @@
 import React from "react";
 import kerala from ".././../assets/AIKerala.webp";
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
 function Hero() {
+  const [searchQuery, setSearchQuery] = useState("");
 
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
 
-
+    const accessToken = localStorage.getItem('accessToken');
+    if (accessToken) {
+      try {
+        await fetch('http://localhost:5000/api/search', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`
+          },
+          body: JSON.stringify({
+            destination: searchQuery
+          })
+        });
+      } catch (error) {
+        console.error('Error recording search:', error);
+      }
+    }
+  };
 
   return (
     <div className="flex justify-center relative w-full h-[500px]">
@@ -22,6 +43,8 @@ function Hero() {
             type="text"
             placeholder="Enter Your Dream Destination"
             className="flex-grow text-gray-700 outline-none"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
           <button className="px-4 py-2 text-white bg-orange-500 rounded-full">
             Search

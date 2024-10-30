@@ -6,7 +6,7 @@ from datetime import datetime
 
 def create_sample_data():
     try:
-        # Create sample users with hashed passwords
+        # Create sample users (keeping existing users)
         users = [
             User(
                 username="john_doe",
@@ -32,93 +32,192 @@ def create_sample_data():
         ]
         for user in users:
             db_session.add(user)
-        db_session.commit()  # Commit users first to get their IDs
-        
-        # Create sample packages
+        db_session.commit()
+
+        # Create packages matching frontend data
         packages = [
             TravelPackage(
-                name="Paris Adventure",
-                destination="Paris, France",
-                duration=7,
-                budget=2500.00,
-                description="Experience the magic of Paris with our carefully curated 7-day adventure. Visit iconic landmarks, enjoy authentic French cuisine, and immerse yourself in Parisian culture.",
-                activities="Eiffel Tower Visit, Louvre Museum Tour, Seine River Cruise, Notre-Dame Cathedral, Montmartre Walking Tour",
-                category="adventure"
+                name="Lakshadweep",
+                image="https://www.fabhotels.com/blog/wp-content/uploads/2024/01/bbec4647-lakshadweep-1.jpg",
+                price="35,000",
+                duration="6 Days",
+                groupSize="15+",
+                location="India",
+                category="adventure",
+                description="Experience the pristine beaches and crystal clear waters of Lakshadweep",
+                activities="Snorkeling, Scuba Diving, Island Hopping"
             ),
             TravelPackage(
-                name="Tokyo Experience",
-                destination="Tokyo, Japan",
-                duration=10,
-                budget=3000.00,
-                description="Dive into the fascinating blend of traditional and modern Japan with our 10-day Tokyo experience. From ancient temples to futuristic technology.",
-                activities="Temples, Sushi Making Class, Mount Fuji Tour, Anime District Visit, Tea Ceremony",
-                category="cultural"
+                name="Himachal Pradesh",
+                image="https://www.fabhotels.com/blog/wp-content/uploads/2024/02/b39a81e3-himachal-pradesh.jpg",
+                price="28,000",
+                duration="4 Days",
+                groupSize="15+",
+                location="India",
+                category="adventure",
+                description="Explore the majestic mountains and valleys of Himachal Pradesh",
+                activities="Trekking, Camping, Paragliding"
             ),
             TravelPackage(
-                name="Bali Retreat",
-                destination="Bali, Indonesia",
-                duration=5,
-                budget=1500.00,
-                description="Escape to paradise with our 5-day Bali retreat. Relax on pristine beaches, explore ancient temples, and rejuvenate your spirit.",
-                activities="Spa Treatments, Yoga Sessions, Temple Visits, Beach Activities, Cooking Class",
-                category="luxury"
-            ),
-            
-            TravelPackage(
-                name="Swiss Alps Adventure",
-                destination="Switzerland",
-                duration=6,
-                budget=3500.00,
-                description="Experience the majestic Swiss Alps with this thrilling 6-day adventure package. Perfect for outdoor enthusiasts and nature lovers.",
-                activities="Skiing, Hiking, Cable Car Rides, Mountain Biking, Swiss Chocolate Workshop",
-                category="adventure"
+                name="Kedarnath",
+                image="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRPxW33faZi-REGBj2wU7q5RwfuN-bmnqGHdg&s",
+                price="22,000",
+                duration="5 Days",
+                groupSize="20+",
+                location="India",
+                category="pilgrimage",
+                description="Sacred pilgrimage to Kedarnath temple",
+                activities="Temple Visit, Trekking, Meditation"
             ),
             TravelPackage(
-                name="Dubai Luxury Escape",
-                destination="Dubai, UAE",
-                duration=4,
-                budget=4000.00,
-                description="Indulge in luxury with our 4-day Dubai package. Experience the perfect blend of modern luxury and Arabian culture.",
-                activities="Desert Safari, Burj Khalifa Visit, Gold Souk Tour, Yacht Cruise, Shopping Festival",
-                category="luxury"
+                name="Bali",
+                image="https://digital.ihg.com/is/image/ihg/intercontinental-bali-9719167392-2x1",
+                price="75,000",
+                duration="7 Days",
+                groupSize="10+",
+                location="Indonesia",
+                category="leisure",
+                description="A tropical paradise with beaches, temples, and rich culture",
+                activities="Beach Relaxing, Sightseeing, Temple Tours"
+            ),
+            TravelPackage(
+                name="Jaipur",
+                image="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRuDD8CIjBDuVukV24jBDSDnW6-DUu3qrzpeQ&s",
+                price="25,000",
+                duration="4 Days",
+                groupSize="15+",
+                location="India",
+                category="leisure",
+                description="Discover the royal heritage of Jaipur, the Pink City",
+                activities="Fort Tours, Cultural Visits, Shopping"
+            ),
+            TravelPackage(
+                name="Kashmir",
+                image="https://www.khyberhotels.com/blog/wp-content/uploads/2023/10/winter-kashmir.jpg",
+                price="32,000",
+                duration="6 Days",
+                groupSize="15+",
+                location="India",
+                category="adventure",
+                description="The mesmerizing beauty of Kashmir awaits you",
+                activities="Shikara Ride, Trekking, Snow Sports"
+            ),
+            TravelPackage(
+                name="Agra",
+                image="https://cdn.britannica.com/25/155325-050-79CFFB62/Taj-Mahal-Agra-India.jpg",
+                price="18,000",
+                duration="3 Days",
+                groupSize="20+",
+                location="India",
+                category="pilgrimage",
+                description="Visit the iconic Taj Mahal and other historical wonders",
+                activities="Historical Tours, Taj Mahal Visit, Sightseeing"
+            ),
+            TravelPackage(
+                name="Kaziranga",
+                image="https://www.kaziranganationalpark-india.com/blog/wp-content/uploads/2022/08/kaziranga-wildlife-2.jpg",
+                price="24,000",
+                duration="4 Days",
+                groupSize="12+",
+                location="India",
+                category="adventure",
+                description="Explore the wildlife of Kaziranga National Park",
+                activities="Safari, Bird Watching, Wildlife Photography"
+            ),
+            TravelPackage(
+                name="Goa",
+                image="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/15/33/fc/f0/goa.jpg?w=600&h=500&s=1",
+                price="30,000",
+                duration="5 Days",
+                groupSize="15+",
+                location="India",
+                category="leisure",
+                description="Sun, sand, and sea in the tropical paradise of Goa",
+                activities="Beach Parties, Water Sports, Nightlife"
+            ),
+            TravelPackage(
+                name="Kerala",
+                image="https://akm-img-a-in.tosshub.com/indiatoday/images/story/201701/kstory_647_010317124538.jpg",
+                price="32,000",
+                duration="6 Days",
+                groupSize="15+",
+                location="India",
+                category="leisure",
+                description="The tranquil backwaters and lush greenery of Kerala",
+                activities="Houseboat Ride, Ayurveda, Backwater Tours"
+            ),
+            TravelPackage(
+                name="Manali",
+                image="https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Manali_City.jpg/1200px-Manali_City.jpg",
+                price="26,000",
+                duration="5 Days",
+                groupSize="15+",
+                location="India",
+                category="adventure",
+                description="Adventure and serenity in the beautiful hill station of Manali",
+                activities="Skiing, Paragliding, Trekking"
+            ),
+            TravelPackage(
+                name="Shimla",
+                image="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ4p6G9CLhkyw5uFV5NUazIng_mq5yuYgBd0A&s",
+                price="24,000",
+                duration="4 Days",
+                groupSize="15+",
+                location="India",
+                category="adventure",
+                description="A charming hill station with colonial architecture",
+                activities="Mountain Hiking, Sightseeing, Shopping"
+            ),
+            TravelPackage(
+                name="Darjeeling",
+                image="https://hikerwolf.com/wp-content/uploads/2020/04/Darjeeling-toy-train-route.jpg",
+                price="28,000",
+                duration="5 Days",
+                groupSize="12+",
+                location="India",
+                category="leisure",
+                description="The tea gardens and breathtaking views of Darjeeling",
+                activities="Tea Garden Tours, Sightseeing, Toy Train Ride"
+            ),
+            TravelPackage(
+                name="Munnar",
+                image="https://dynamic-media-cdn.tripadvisor.com/media/photo-o/15/33/fc/f0/goa.jpg",
+                price="25,000",
+                duration="4 Days",
+                groupSize="15+",
+                location="India",
+                category="adventure",
+                description="The rolling hills and tea estates of Munnar",
+                activities="Tea Garden Tours, Trekking, Wildlife Safari"
+            ),
+            TravelPackage(
+                name="Ooty",
+                image="https://hikerwolf.com/wp-content/uploads/2020/04/Darjeeling-toy-train-route.jpg",
+                price="23,000",
+                duration="4 Days",
+                groupSize="15+",
+                location="India",
+                category="adventure",
+                description="The Queen of Hill Stations with cool climate and scenic views",
+                activities="Mountain Hiking, Botanical Garden Visit, Toy Train Ride"
+            ),
+            TravelPackage(
+                name="Coorg",
+                image="https://www.holidify.com/images/bgImages/COORG.jpg",
+                price="27,000",
+                duration="5 Days",
+                groupSize="15+",
+                location="India",
+                category="adventure",
+                description="A serene hill station known for coffee plantations",
+                activities="Coffee Plantation Tour, Trekking, Waterfalls"
             )
         ]
+        
         for package in packages:
             db_session.add(package)
-        db_session.commit()  # Commit packages before adding search history
-        
-        # Create sample search history
-        searches = [
-            SearchHistory(
-                user_id=1,  # john_doe
-                destination="Paris, France",
-                search_date=datetime.utcnow()
-            ),
-            SearchHistory(
-                user_id=1,  # john_doe
-                destination="Tokyo, Japan",
-                search_date=datetime.utcnow()
-            ),
-            SearchHistory(
-                user_id=2,  # jane_smith
-                destination="Bali, Indonesia",
-                search_date=datetime.utcnow()
-            ),
-            SearchHistory(
-                user_id=2,  # jane_smith
-                destination="Switzerland",
-                search_date=datetime.utcnow()
-            ),
-            SearchHistory(
-                user_id=3,  # admin
-                destination="Dubai, UAE",
-                search_date=datetime.utcnow()
-            )
-        ]
-        for search in searches:
-            db_session.add(search)
-        
         db_session.commit()
+        
         print("Sample data created successfully!")
         
     except Exception as e:
@@ -128,15 +227,12 @@ def create_sample_data():
 
 def init_database():
     try:
-        # Drop all tables
         print("Dropping existing tables...")
         Base.metadata.drop_all(bind=engine)
         
-        # Create all tables
         print("Creating new tables...")
         init_db()
         
-        # Create sample data
         print("Creating sample data...")
         create_sample_data()
         

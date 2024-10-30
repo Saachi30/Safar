@@ -13,11 +13,11 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     username = Column(String(100), unique=True, nullable=False)
     email = Column(String(100), unique=True, nullable=False)
-    phone=Column(String(10), unique=True, nullable=False)
+    phone = Column(String(10), unique=True, nullable=False)
     password_hash = Column(String(256), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     search_history = relationship('SearchHistory', back_populates='user')
-
+    
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
     
@@ -29,12 +29,14 @@ class TravelPackage(Base):
     
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False)
-    destination = Column(String(100), nullable=False)
-    duration = Column(Integer, nullable=False)  # in days
-    budget = Column(Float, nullable=False)
+    image = Column(String(500), nullable=False)  # Added image URL field
+    price = Column(String(20), nullable=False)   # Changed from budget to price, using string to match frontend format
+    duration = Column(String(20), nullable=False) # Changed to string to match "X Days" format
+    groupSize = Column(String(20), nullable=False) # Added group size field
+    location = Column(String(100), nullable=False) # Added location field
     description = Column(String(500), nullable=True)
     activities = Column(String(200), nullable=True)
-    category = Column(String(50), nullable=False)  # e.g., adventure, luxury, budget
+    category = Column(String(50), nullable=False)
 
 class SearchHistory(Base):
     __tablename__ = 'search_history'
