@@ -266,39 +266,40 @@ def add_package():
 @jwt_required()
 def record_search():
     try:
-        # Get and validate request data
         data = request.get_json()
-        print(data)
         if not data:
-            return jsonify({
-                "status": "error",
-                "message": "No data provided"
-            }), 400
+            return jsonify({"status": "error", "message": "No data provided"}), 400
 
-        # Extract location/destination from the request
         location = data.get('location') or data.get('destination')
         if not location:
-            return jsonify({
-                "status": "error",
-                "message": "Location or destination is required"
-            }), 400
+            return jsonify({"status": "error", "message": "Location or destination is required"}), 400
 
-        # Get current user
         current_user_id = get_jwt_identity()
         if not current_user_id:
-            return jsonify({
-                "status": "error",
-                "message": "User not authenticated"
-            }), 401
+            return jsonify({"status": "error", "message": "User not authenticated"}), 401
 
-        # Create new search history entry
+        # Fetch the last 4 search history entries for the user
+        recent_searches = db_session.query(SearchHistory) \
+            .filter_by(user_id=current_user_id) \
+            .order_by(SearchHistory.search_date.desc()) \
+            .limit(4) \
+            .all()
+
+        # Delete any existing search history entries beyond the last 4
+        old_searches = db_session.query(SearchHistory) \
+            .filter_by(user_id=current_user_id) \
+            .order_by(SearchHistory.search_date.desc()) \
+            .offset(4) \
+            .all()
+        for search in old_searches:
+            db_session.delete(search)
+
+        # Create a new search history entry
         new_search = SearchHistory(
             user_id=current_user_id,
             destination=location,
             search_date=datetime.utcnow()
         )
-        
-        # Add to database
         db_session.add(new_search)
         db_session.commit()
 
@@ -313,13 +314,10 @@ def record_search():
 
     except Exception as e:
         db_session.rollback()
-        print(f"Search error: {str(e)}")  # For debugging
-        return jsonify({
-            "status": "error",
-            "message": "An error occurred while recording search",
-            "error": str(e)
-        }), 500
-
+        print(f"Search error: {str(e)}")
+        return jsonify({"status": "error", "message": "An error occurred while recording search", "error": str(e)}), 500
+    
+    
 # Recommendations route
 @app.route('/api/recommendations')
 @jwt_required()
