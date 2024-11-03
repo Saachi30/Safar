@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from config import Config
 from flask_cors import CORS  # Add this import
 import re
-from scrape2 import scrape_packages
+from scrape2 import scrape_and_store_packages
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -186,27 +186,51 @@ def get_users():
 @app.route('/api/packages', methods=['GET'])
 def get_packages():
     try:
+        # First, update packages from the website
+        scrape_and_store_packages()
+        
+        # Then fetch all packages from database
         packages = db_session.query(TravelPackage).all()
+        
+        # Split packages into chunks for UI display
+        total_packages = len(packages)
+        midpoint = total_packages // 2
+        
         return jsonify({
             "status": "success",
-            "packages": [{
-                "id": p.id,
-                "name": p.name,
-                "image": p.image,
-                "price": p.price,
-                "duration": p.duration,
-                "groupSize": p.groupSize,
-                "location": p.location,
-                "description": p.description,
-                "activities": p.activities,
-                "category": p.category
-            } for p in packages]
+            "packages": {
+                "firstRow": [{
+                    "id": p.id,
+                    "name": p.name,
+                    "image": p.image,
+                    "price": p.price,
+                    "duration": p.duration,
+                    "groupSize": p.groupSize,
+                    "location": p.location,
+                    "description": p.description,
+                    "activities": p.activities,
+                    "category": p.category
+                } for p in packages[:midpoint]],
+                "secondRow": [{
+                    "id": p.id,
+                    "name": p.name,
+                    "image": p.image,
+                    "price": p.price,
+                    "duration": p.duration,
+                    "groupSize": p.groupSize,
+                    "location": p.location,
+                    "description": p.description,
+                    "activities": p.activities,
+                    "category": p.category
+                } for p in packages[midpoint:]]
+            }
         }), 200
     except Exception as e:
         return jsonify({
             "status": "error",
             "message": str(e)
         }), 500
+
 
 @app.route('/api/packages', methods=['POST'])
 def add_package():
@@ -318,8 +342,7 @@ def record_search():
         print(f"Search error: {str(e)}")
         return jsonify({"status": "error", "message": "An error occurred while recording search", "error": str(e)}), 500
     
-    
-# Recommendations route
+#Recommendations route
 @app.route('/api/recommendations')
 @jwt_required()
 def get_recommendations():
@@ -335,26 +358,10 @@ def get_recommendations():
         user_history = db_session.query(SearchHistory).filter_by(user_id=current_user_id)\
             .order_by(SearchHistory.search_date.desc()).all()
         
-        # If no search history, return regular packages
-        if not user_history:
-            packages = db_session.query(TravelPackage).all()
-            return jsonify({
-                "recommendations": [{
-                    "id": p.id,
-                    "name": p.name,
-                    "image": p.image,
-                    "price": p.price,
-                    "duration": p.duration,
-                    "groupSize": p.groupSize,
-                    "location": p.location,
-                    "description": p.description,
-                    "activities": p.activities,
-                    "category": p.category
-                } for p in packages]
-            }), 200
-            
         # Get all packages
         packages = db_session.query(TravelPackage).all()
+        
+        # If no packages available, return empty list
         if not packages:
             return jsonify({"recommendations": []}), 200
             
@@ -364,25 +371,25 @@ def get_recommendations():
         # Get recommendations
         recommendations = recommendation_engine.get_recommendations(user_history)
         
-        if recommendations.empty:
-            # Fallback to all packages if no recommendations
-            return jsonify({
-                "recommendations": [{
-                    "id": p.id,
-                    "name": p.name,
-                    "image": p.image,
-                    "price": p.price,
-                    "duration": p.duration,
-                    "groupSize": p.groupSize,
-                    "location": p.location,
-                    "description": p.description,
-                    "activities": p.activities,
-                    "category": p.category
-                } for p in packages]
-            }), 200
+        # The recommendation_engine now returns a dict with 'recommendations' key
+        # So we can directly return it
+        if recommendations and 'recommendations' in recommendations:
+            return jsonify(recommendations), 200
         
+        # Fallback to all packages if recommendations is empty or invalid
         return jsonify({
-            "recommendations": recommendations.to_dict(orient='records')
+            "recommendations": [{
+                "id": p.id,
+                "name": p.name,
+                "image": p.image,
+                "price": p.price,
+                "duration": p.duration,
+                "groupSize": p.groupSize,
+                "location": p.location,
+                "description": p.description,
+                "activities": p.activities,
+                "category": p.category
+            } for p in packages]
         }), 200
         
     except Exception as e:
@@ -407,23 +414,6 @@ def get_recommendations():
         except Exception as inner_e:
             return jsonify({"error": f"Failed to get recommendations: {str(e)}", "inner_error": str(inner_e)}), 500
         
-
-
-
-
-
-@app.route('/api/scrapedData', methods=['GET'])
-def scrape_packages_route():
-    try:
-        data = scrape_packages()
-        return jsonify(data), 200
-    except Exception as e:
-        return jsonify({
-            "status": "error",
-            "message": str(e)
-        }), 500
-
-
         
 
 # Error handlers
