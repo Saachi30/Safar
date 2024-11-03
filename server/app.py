@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from config import Config
 from flask_cors import CORS  # Add this import
 import re
+from scrape2 import scrape_packages
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -405,6 +406,25 @@ def get_recommendations():
             }), 200
         except Exception as inner_e:
             return jsonify({"error": f"Failed to get recommendations: {str(e)}", "inner_error": str(inner_e)}), 500
+        
+
+
+
+
+
+@app.route('/api/scrapedData', methods=['GET'])
+def scrape_packages_route():
+    try:
+        data = scrape_packages()
+        return jsonify(data), 200
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "message": str(e)
+        }), 500
+
+
+        
 
 # Error handlers
 @app.errorhandler(404)
