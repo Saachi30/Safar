@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { useNavigate } from 'react-router-dom';
+import plan from './Plan.jsx'
 
 function TravelPref() {
   const [destinations, setDestinations] = useState([]);
@@ -14,6 +16,7 @@ function TravelPref() {
   const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
   const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+  const navigate = useNavigate();
 
   const handleAddDestination = async () => {
     if (currentDestination.trim()) {
@@ -147,6 +150,7 @@ function TravelPref() {
     } finally {
       setLoading(false);
     }
+    navigate('/plan')
   };
 
   return (

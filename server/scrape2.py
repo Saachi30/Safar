@@ -33,8 +33,8 @@ def scrape_and_store_packages():
             try:
                 details = package.find('div', class_='col-8 col-md-6 inventory-details')
                 name = details.find('h3').text.strip() if details and details.find('h3') else "Package"
-                price_elem = package.find('p', class_='price')
-                price = clean_price(price_elem.text.strip()) if price_elem else "₹29999"
+                prices_elem = package.find('p', class_='price')
+                price = clean_price(prices_elem.text.strip()) if prices_elem else "Price on request"
                 places_elem = package.find('p', class_='places-covered')
                 places = places_elem.text.strip() if places_elem else "Multiple destinations"
                 images = package.find('img', class_='w-100 lazy')

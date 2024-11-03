@@ -1,6 +1,7 @@
 import React from 'react';
 import plan from "../assets/plan.jpg";
 import money from "../assets/money.webp";
+import { useNavigate } from 'react-router-dom';
 
 const Plan = () => {
   const packages = Array(12).fill({
@@ -11,6 +12,11 @@ const Plan = () => {
     image1: plan,
     image2: money,
   });
+  const navigate = useNavigate();
+
+  const handlePackageClick = () => {
+    navigate('/itinerary');
+  }
 
   return (
     <div className="grid grid-cols-3 gap-16 p-4 max-w-6xl mx-auto mt-8 mb-14">
@@ -18,6 +24,7 @@ const Plan = () => {
         <div 
           key={index}
           className="relative rounded-xl overflow-hidden group cursor-pointer h-80 shadow-lg"
+          onClick={() => handlePackageClick()}
         >
           <img 
             src={pkg.image1} 
