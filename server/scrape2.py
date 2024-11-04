@@ -1,20 +1,31 @@
-# scrape2.py
 from bs4 import BeautifulSoup
 import requests
 from database import db_session
 from models import TravelPackage
+import re
 
 def clean_price(price_str):
-    # Extract numeric value and convert to standard format
-    import re
-    numbers = re.findall(r'\d+', price_str)
+    # Extract complete numeric value and convert to standard format
+    if not price_str:
+        return "Price on request"
+    
+    # Remove any whitespace and convert to lowercase for consistent processing
+    price_str = price_str.strip().lower()
+    
+    # Extract all numbers from the string
+    numbers = ''.join(re.findall(r'\d+', price_str))
+    
     if numbers:
-        return f"₹{numbers[0]}"
+        if "per adult" in price_str:
+            return f"₹{numbers} per adult"
+        return f"₹{numbers}"
     return "Price on request"
 
 def clean_duration(places_str):
     # Extract duration from places string or return default
-    import re
+    if not places_str:
+        return "5 Days"  # Default duration
+    
     duration_match = re.search(r'(\d+)\s*(?:Days?|Nights?)', places_str, re.IGNORECASE)
     if duration_match:
         return f"{duration_match.group(1)} Days"
@@ -34,11 +45,16 @@ def scrape_and_store_packages():
                 details = package.find('div', class_='col-8 col-md-6 inventory-details')
                 name = details.find('h3').text.strip() if details and details.find('h3') else "Package"
                 prices_elem = package.find('p', class_='price')
-                price = clean_price(prices_elem.text.strip()) if prices_elem else "Price on request"
+                price = clean_price(prices_elem.get_text(strip=True)) if prices_elem else "Price on request"
                 places_elem = package.find('p', class_='places-covered')
                 places = places_elem.text.strip() if places_elem else "Multiple destinations"
                 images = package.find('img', class_='w-100 lazy')
                 image_url = images.get('data-original') if images else images.get('src') if images else "/default-package.jpg"
+
+                print(f"Package: {name}")
+                print(f"Raw price: {prices_elem.get_text(strip=True) if prices_elem else 'No price found'}")
+                print(f"Cleaned price: {price}")
+                print("-" * 50)
                 
                 # Create new package with standardized format
                 new_package = TravelPackage(
