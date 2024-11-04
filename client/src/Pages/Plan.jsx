@@ -1,60 +1,98 @@
-import React from 'react';
-import plan from "../assets/plan.jpg";
-import money from "../assets/money.webp";
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import money from '../assets/money.webp';
+import plan from '../assets/plan.jpg';
 
 const Plan = () => {
-  const packages = Array(12).fill({
-    title: 'PACKAGE 1',
-    days: '21 days',
-    price: '55,000/-',
-    plan: 'Family Plan',
-    image1: plan,
-    image2: money,
-  });
+  const { state: travelPlan } = useLocation();
   const navigate = useNavigate();
+  const [packageImages, setPackageImages] = useState({});
+  
+  const PIXABAY_API_KEY = import.meta.env.VITE_PIXABAY_API_KEY;
 
-  const handlePackageClick = () => {
-    navigate('/itinerary');
-  }
+  useEffect(() => {
+    const fetchImages = async () => {
+      const newImages = { ...packageImages };
+      
+      for (let i = 0; i < travelPlan.length; i++) {
+        try {
+          const placeName = travelPlan[i].itinerary?.days?.[0]?.locations?.[0]?.placeName || 'travel destination';
+          const response = await fetch(
+            `https://pixabay.com/api/?key=${PIXABAY_API_KEY}&q=${encodeURIComponent(placeName)}&image_type=photo&orientation=horizontal&per_page=3`
+          );
+          const data = await response.json();
+          
+          // If images found, use the first one, otherwise use a fallback
+          if (data.hits && data.hits.length > 0) {
+            newImages[i] = data.hits[0].webformatURL;
+          } else {
+            newImages[i] = "/api/placeholder/800/600";
+          }
+        } catch (error) {
+          console.error('Error fetching image:', error);
+          newImages[i] = "/api/placeholder/800/600";
+        }
+      }
+      
+      setPackageImages(newImages);
+    };
+
+    fetchImages();
+  }, [travelPlan]);
+
+  const getPlaceName = (singlePackage) => {
+    try {
+      return singlePackage.itinerary.days[0].locations[0].placeName || 'Exciting Destination';
+    } catch (error) {
+      return 'Exciting Destination';
+    }
+  };
+
+  const handlePackageClick = (singlePackage) => {
+    navigate('/itinerary', { state: singlePackage });
+  };
 
   return (
-    <div className="grid grid-cols-3 gap-16 p-4 max-w-6xl mx-auto mt-8 mb-14">
-      {packages.map((pkg, index) => (
-        <div 
-          key={index}
-          className="relative rounded-xl overflow-hidden group cursor-pointer h-80 shadow-lg"
-          onClick={() => handlePackageClick()}
-        >
-          <img 
-            src={pkg.image1} 
-            alt="Travel package"
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-
-          <div className="absolute bottom-0 left-0 right-0 h-[40%] bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-all duration-300">
-            <div className="h-full flex flex-col justify-center items-start px-6 text-white">
-              <h3 className="font-bold text-2xl mb-1">{pkg.title}</h3>
-              <div className="flex items-center gap-12 mb-1">
-                <span className="text-lg">{pkg.days}</span>
-                <div className="flex items-center gap-1">
-                  <img 
-                    src={pkg.image2}
-                    alt="price icon"
-                    className="w-12 h-12"
-                  />
-                  <span className="text-lg">{pkg.price}</span>
-                </div>
+    <div className="max-w-7xl mx-auto py-8 px-4">
+      <h1 className="text-3xl font-bold mb-8 text-gray-800">Travel Packages</h1>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+        {travelPlan.map((singlePackage, index) => (
+          <div
+            key={index}
+            className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+            onClick={() => handlePackageClick(singlePackage)}
+          >
+            <div className="relative">
+              <img
+                src={packageImages[index] || "/api/placeholder/800/600"}
+                alt={getPlaceName(singlePackage)}
+                className="w-full h-48 object-cover rounded-t-lg"
+                onError={(e) => {
+                  e.target.src = "/api/placeholder/800/600";
+                }}
+              />
+              <div className="absolute top-2 left-2 bg-white bg-opacity-90 rounded-full px-3 py-1 text-sm font-medium text-gray-700">
+                {singlePackage.itinerary?.days?.length || 0} Days
               </div>
-              <p className="font-bold text-lg">{pkg.plan}</p>
+            </div>
+            <div className="p-4">
+              <h3 className="text-lg font-bold mb-2 text-gray-800">
+                Plan {index + 1}
+              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-gray-600 font-medium">
+                  Price: {singlePackage.itinerary?.hotels?.[0]?.price || 'TBD'}
+                </span>
+                <img src={money} alt="Price" className="w-6 h-6" />
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-gray-600 font-medium">Family Package</span>
+                <img src={plan} alt="Plan" className="w-6 h-6" />
+              </div>
             </div>
           </div>
-
-          <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-3 text-center opacity-100 group-hover:opacity-0 transition-opacity duration-300">
-            <p className="font-bold text-lg">{pkg.plan}</p>
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };

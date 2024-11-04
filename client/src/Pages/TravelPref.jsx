@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { useNavigate } from 'react-router-dom';
-import plan from './Plan.jsx'
 
 function TravelPref() {
   const [destinations, setDestinations] = useState([]);
@@ -10,9 +9,8 @@ function TravelPref() {
   const [currentDestination, setCurrentDestination] = useState('');
   const [budget, setBudget] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [travelPlan, setTravelPlan] = useState(null);
   const [error, setError] = useState(null);
-
+  let travelPlan={};
   const GOOGLE_API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
   const genAI = new GoogleGenerativeAI(GOOGLE_API_KEY);
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
@@ -54,60 +52,71 @@ function TravelPref() {
   };
 
   const generatePrompt = (location, days, companion, budget) => {
+    // Create a dynamic template for the number of days
+    const generateDaysTemplate = (numDays) => {
+      const daysArray = [];
+      for (let i = 1; i <= numDays; i++) {
+        daysArray.push({
+          day: i,
+          locations: [
+            {
+              placeName: "string",
+              placeDetails: "string",
+              imageUrl: "string",
+              coordinates: {
+                lat: "number",
+                lng: "number"
+              },
+              ticketPrice: "string",
+              timeToSpend: "string",
+              bestTimeToVisit: "string"
+            }
+          ]
+        });
+      }
+      return daysArray;
+    };
+
+    // Create the template object with the dynamic days
+    const template = {
+      packages: Array(3).fill({
+        itinerary: {
+          days: generateDaysTemplate(parseInt(days)),
+          hotels: [
+            {
+              hotelName: "string",
+              address: "string",
+              price: "string",
+              imageUrl: "string",
+              coordinates: {
+                lat: "number",
+                lng: "number"
+              },
+              rating: "number",
+              description: "string"
+            }
+          ]
+        },
+        totalBudget: "string",
+        suggestedDuration: "string"
+      })
+    };
+
     return `You are a travel planning API that ONLY responds in JSON format.
-    Create a travel plan with the following specifications:
+    Create 3 different travel plans with the following specifications:
     - Location: ${location}
     - Duration: ${days} days
     - Travel Group: ${companion}
     - Budget: ₹${budget}
-
-    Respond ONLY with a JSON object in the following format, with no additional text or explanation:
-    {
-      "itinerary": {
-        "days": [
-          {
-            "day": 1,
-            "locations": [
-              {
-                "placeName": "string",
-                "placeDetails": "string",
-                "imageUrl": "string",
-                "coordinates": {
-                  "lat": number,
-                  "lng": number
-                },
-                "ticketPrice": "string",
-                "timeToSpend": "string",
-                "bestTimeToVisit": "string"
-              }
-            ]
-          }
-        ],
-        "hotels": [
-          {
-            "hotelName": "string",
-            "address": "string",
-            "price": "string",
-            "imageUrl": "string",
-            "coordinates": {
-              "lat": number,
-              "lng": number
-            },
-            "rating": number,
-            "description": "string"
-          }
-        ]
-      },
-      "totalBudget": "string",
-      "suggestedDuration": "string"
-    }`;
+  
+    Respond ONLY with a JSON object matching this exact structure, with no additional text or explanation:
+    ${JSON.stringify(template, null, 2)}`;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    setTravelPlan(null);
 
     try {
       const promptText = generatePrompt(
@@ -129,14 +138,14 @@ function TravelPref() {
       const response = await result.response;
       const responseText = response.text();
       
-      // Try to extract JSON from the response
       try {
-        // Look for JSON-like structure in the response
         const jsonMatch = responseText.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
           const jsonStr = jsonMatch[0];
           const planJson = JSON.parse(jsonStr);
-          setTravelPlan(planJson);
+          travelPlan=planJson
+          console.log(planJson);
+          navigate('/plan', { state: planJson.packages });
         } else {
           setError("Response was not in the expected JSON format");
         }
@@ -150,8 +159,8 @@ function TravelPref() {
     } finally {
       setLoading(false);
     }
-    navigate('/plan')
   };
+
 
   return (
     <div className="flex flex-col items-center justify-center p-8 gap-14">
@@ -271,16 +280,7 @@ function TravelPref() {
         </div>
       )}
 
-      {travelPlan && (
-        <div className="mt-8 w-full max-w-2xl">
-          <h2 className="text-2xl font-bold mb-4">Your Travel Plan</h2>
-          <div className="bg-gray-50 p-4 rounded-lg overflow-x-auto">
-            <pre className="whitespace-pre-wrap break-words">
-              {JSON.stringify(travelPlan, null, 2)}
-            </pre>
-          </div>
-        </div>
-      )}
+      
     </div>
   );
 }
