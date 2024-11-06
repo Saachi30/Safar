@@ -9,6 +9,7 @@ import Footer from './Pages/Footer/Footer';
 import TravelPref from './Pages/TravelPref';
 import Plan from './Pages/Plan';
 import Itinerary from './Itinerary';
+import ProfilePage from './Pages/Profile/ProfilePage';
 
 function App() {
 
@@ -24,6 +25,7 @@ function App() {
         <Route path='travelpref' element={<TravelPref/>}/>
         <Route path = 'plan' element={<Plan/>}/>
         <Route path='itinerary' element={<Itinerary/>}/>
+        <Route path='profilepage' element={<ProfilePage/>}/>
       </Routes>
       <Footer/>
     </BrowserRouter>

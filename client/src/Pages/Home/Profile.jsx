@@ -7,7 +7,7 @@ function Profile() {
       <ul className="py-1">
         <li>
           <Link
-            to="/profile"
+            to="/profilepage"
             className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
           >
             My Profile
